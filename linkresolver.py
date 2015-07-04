@@ -6,7 +6,7 @@ from enum import Enum
 from timer import Timer
 
 class HTTPCode(Enum):
-    """Make HTTP codes human readable
+    """Make HTTP codes human readable.
 
     Enum used for making HTTP codes human readable from within the code.
     Also allows for easy extension of handling more HTTP codes.
@@ -14,7 +14,7 @@ class HTTPCode(Enum):
     OK = 200
 
 class LinkResolver():
-    """Gets title of a given html page
+    """Gets title of a given html page.
 
     Uses the 'requests' python package to download the content of the given url.
     Will allow for only a single redirect to counter trying to resolve an
@@ -56,14 +56,17 @@ class LinkResolver():
             allow_redirects=False
         )
 
-        # Follow a single redirect
-        if response.headers.get('location'):
-            response = get(
-                response.headers.get('location'),
-                timeout=self.receiving_timeout,
-                stream=True,
-                allow_redirects=False
-            )
+        # Follow up to 3 redirects
+        for i in range(0, 3):
+            if response.headers.get('location'):
+                response = get(
+                    response.headers.get('location'),
+                    timeout=self.receiving_timeout,
+                    stream=True,
+                    allow_redirects=False
+                )
+            else:
+                break
 
         response.raise_for_status()
 
@@ -93,7 +96,8 @@ class LinkResolver():
             if time.time() - start > self.receiving_timeout:
                 raise ValueError('Took too long downloading page')
 
-                size += len(chunk)
+            size += len(chunk)
+
             if size > self.max_content_size:
                 raise ValueError('response too large')
 

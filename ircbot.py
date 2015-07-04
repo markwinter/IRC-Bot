@@ -14,7 +14,7 @@ class Bot(Component):
         self.host = host
         self.port = int(port)
         self.nick = "fluffybot"
-        self.password = ""
+        self.password = open("password").read().strip()
 
         TCPClient(channel=self.channel).register(self)
         IRC(channel=self.channel).register(self)
@@ -61,7 +61,6 @@ class Bot(Component):
         # else wait for end of motd to start sending commands
         elif numeric in (RPL_ENDOFMOTD, ERR_NOMOTD):
             self.fire(PRIVMSG("NICKSERV", "IDENTIFY " + self.password))
-            self.fire(JOIN("#softkitty"))
 
     def privmsg(self, source, target, message):
         """Message Event
