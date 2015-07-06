@@ -22,7 +22,7 @@ class Join():
         if len(keywords) != 2:
             return -1
 
-        if source[0] == "astonex" or source[0] == "softkitty":
+        if source[0] in ircbot.owners and source[2] == ircbot.owner_host:
             ircbot.fire(JOIN(keywords[1]))
         else:
             ircbot.fire(PRIVMSG(target, "Must be authorised to use this command"))
@@ -41,10 +41,14 @@ class Bot(Component):
     def init(self, host="irc.freenode.net", port="6667", channel="softkitty"):
         self.host = host
         self.port = int(port)
+
         self.nick = "fluffybot"
         self.password = open("password").read().strip()
 
         self.command_char = "!"
+
+        self.owners = ["softkitty", "astonex"]
+        self.owner_host = open("host").read().strip()
 
         self.linkresolver = LinkResolver()
 
