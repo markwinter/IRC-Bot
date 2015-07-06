@@ -10,6 +10,11 @@ from circuits.protocols.irc import IRC, PRIVMSG, USER, NICK, JOIN
 from circuits.protocols.irc import ERR_NICKNAMEINUSE
 from circuits.protocols.irc import RPL_ENDOFMOTD, ERR_NOMOTD
 
+"""
+A few small commands that are really a part of the bot itself and don't deserve
+a file to themselves
+"""
+
 class Source():
     def execute(self, keywords, target, source, ircbot):
         ircbot.fire(PRIVMSG(target, "Source available here: https://github.com/Astonex/IRC-Bot/"))
@@ -19,9 +24,11 @@ class Source():
 
 class Join():
     def execute(self, keywords, target, source, ircbot):
-        if len(keywords) != 2:
+        # Check a channel name was given and it starts with a #
+        if len(keywords) != 2 or keywords[1][:1] != "#":
             return -1
 
+        # Only let the owners of the bot use this command
         if source[0] in ircbot.owners and source[2] == ircbot.owner_host:
             ircbot.fire(JOIN(keywords[1]))
         else:
@@ -37,18 +44,25 @@ class Commands():
     def usage(self):
         pass
 
+"""
+The actual bot
+"""
+
 class Bot(Component):
-    def init(self, host="irc.freenode.net", port="6667", channel="softkitty"):
+    def init(self, nick="fluffybot", command_char="!",
+             owners=["astonex", "softkitty"], password_file="password",
+             host_file="host", host="irc.freenode.net", port="6667", channel="main"):
+
         self.host = host
         self.port = int(port)
 
-        self.nick = "fluffybot"
-        self.password = open("password").read().strip()
+        self.nick = nick
+        self.password = open(password_file).read().strip()
 
-        self.command_char = "!"
+        self.command_char = command_char
 
-        self.owners = ["softkitty", "astonex"]
-        self.owner_host = open("host").read().strip()
+        self.owners = owners
+        self.owner_host = open(host_file).read().strip()
 
         self.linkresolver = LinkResolver()
 
@@ -141,6 +155,6 @@ class Bot(Component):
 
         return "Available commands: " + list
 
-bot = Bot(*sys.argv[1:])
+bot = Bot()
 Debugger().register(bot)
 bot.run()

@@ -7,4 +7,3 @@ class Watcher():
 
     def usage(self):
         return "Not yet implemented"
-        #return "Usage: !watch <board id> <keyword>"
