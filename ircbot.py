@@ -140,7 +140,10 @@ class Bot(Component):
 
         for key in self.commands:
             if key == keywords[0][1:]:
-                response = self.commands[key].execute(keywords, target, source, self)
+                try:
+                    response = self.commands[key].execute(keywords, target, source, self)
+                except:
+                    self.fire(PRIVMSG(target, "Command " + self.command_char + str(key) + " raised an exception"))
 
                 if response == -1:
                     self.fire(PRIVMSG(target, self.commands[key].usage()))
