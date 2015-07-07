@@ -86,13 +86,12 @@ class LinkResolver():
            int(response.headers.get('Content-Length')) > self.max_content_size):
             raise ValueError('reponse too large')
 
-
         # Download page in 1024 byte chunks, checking for time taken and max
         # size on the go
         size = 0
         start = time.time()
         chunks = ""
-        for chunk in response.iter_content(1024):
+        for chunk in response.iter_content(1024, decode_unicode=True):
             if time.time() - start > self.receiving_timeout:
                 raise ValueError('Took too long downloading page')
 
@@ -108,6 +107,19 @@ class LinkResolver():
 
         if title:
             title = title[0].text.strip()
+
+            # Detect Korean language
+            is_korean = False
+            maxchar = max(title)
+            if ((u'\u1100' <= maxchar <= u'\u11FF') or (u'\u3130' <= maxchar <= u'\u318F') or
+                (u'\uAC00' <= maxchar <= u'\uD7AF')):
+                is_korean = True
+
             title = filter(lambda x: x in string.printable, title)
+
             self.timer.stop_timer()
-            return "Title: {0:s} ({1:.2f}s)".format(title, self.timer.elapsed_time())
+
+            if is_korean:
+                return "Title: {0:s} ({1:.2f}s) \x02\x0304[Korean]\x03\x02".format(title, self.timer.elapsed_time())
+            else:
+                return "Title: {0:s} ({1:.2f}s)".format(title, self.timer.elapsed_time())
