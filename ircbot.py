@@ -71,7 +71,7 @@ class Bot(Component):
             'help': Commands(),
             'join': Join(),
             'source': Source(),
-            'watch': Watcher()
+            'watch': Watcher(self)
         }
 
         TCPClient(channel=self.channel).register(self)
@@ -101,6 +101,9 @@ class Bot(Component):
 
         Triggered by the underlying tcpclient Component when the connection is lost
         """
+
+        # Stop the Watcher() thread
+        self.commands['watch'].stop()
 
         raise SystemExit(0)
 
