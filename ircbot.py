@@ -3,6 +3,7 @@ import sys
 from linkresolver import LinkResolver
 from watchfourchan import WatchFourChan
 from watchhackernews import WatchHackerNews
+from watchreddit import WatchReddit
 from re import findall
 from circuits import Debugger
 from circuits import Component
@@ -74,6 +75,7 @@ class Bot(Component):
             'source': Source(),
             '4chan': WatchFourChan(self),
             'hn': WatchHackerNews(self),
+            'reddit': WatchReddit(self),
         }
 
         TCPClient(channel=self.channel).register(self)
