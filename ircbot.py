@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 from linkresolver import LinkResolver
-from watcher import Watcher
+from watchfourchan import WatchFourChan
+from watchhackernews import WatchHackerNews
 from re import findall
 from circuits import Debugger
 from circuits import Component
@@ -71,7 +72,8 @@ class Bot(Component):
             'help': Commands(),
             'join': Join(),
             'source': Source(),
-            'watch': Watcher(self)
+            '4chan': WatchFourChan(self),
+            'hn': WatchHackerNews(self),
         }
 
         TCPClient(channel=self.channel).register(self)
@@ -94,16 +96,13 @@ class Bot(Component):
         """
 
         self.fire(NICK(self.nick))
-        self.fire(USER(self.nick, self.nick, host, "Link Resolver Bot"))
+        self.fire(USER(self.nick, self.nick, host, "Bot of Astonex or Softkitty"))
 
     def disconnected(self):
         """Disconnected Event.
 
         Triggered by the underlying tcpclient Component when the connection is lost
         """
-
-        # Stop the Watcher() thread
-        self.commands['watch'].stop()
 
         raise SystemExit(0)
 

@@ -8,7 +8,7 @@ import string
 
 mutex = Lock()
 
-class Watcher(Thread):
+class WatchFourChan(Thread):
     def __init__(self, ircbot):
         Thread.__init__(self)
 
@@ -84,7 +84,10 @@ class Watcher(Thread):
                                 continue
 
                             for keyword in self.watch[board]:
-                                if keyword in thread.get('sub', '') or keyword in thread.get('com', ''):
+                                
+                                if (keyword.lower() in thread.get('sub', '').lower() or
+                                    keyword.lower() in thread.get('com', '').lower()):
+
                                     self.add_seen(board, thread, keyword)
 
                 mutex.release()
@@ -99,7 +102,3 @@ class Watcher(Thread):
                 "' thread found: https://boards.4chan.org/" + str(board) +
                 "/thread/" + str(thread['no']))
             )
-
-    def stop(self):
-        print ("Stopping")
-        self.running = False
