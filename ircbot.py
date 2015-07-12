@@ -143,6 +143,8 @@ class Bot(Component):
 
         for key in self.commands:
             if key == keywords[0][1:]:
+                response = 0
+
                 try:
                     response = self.commands[key].execute(keywords, target, source, self)
                 except:

@@ -4,6 +4,7 @@ from simplejson import loads
 from threading import Thread, Lock
 from time import sleep
 from circuits.protocols.irc import PRIVMSG
+import string
 
 mutex = Lock()
 
@@ -36,9 +37,14 @@ class Watcher(Thread):
         board = keywords[1]
         keyword = keywords[2]
 
-        # Only accept keywords 3 or more chars long
+        # Only accept keywords 3
         if len(keyword) < 3:
             return -1
+
+        # Check for ascii only letters
+        for c in keyword:
+            if c not in string.printable:
+                return -1
 
         # Check its a valid board
         if board not in self.watch:
@@ -52,8 +58,10 @@ class Watcher(Thread):
         finally:
             mutex.release()
 
+        self.ircbot.fire(PRIVMSG(target, "Now watching for '" + keyword + "' on /" + board + "/"))
+
     def usage(self):
-        return "!watch <board> <keyword> - keyword must be 3 or more letters long"
+        return "!watch <board> <keyword> - keyword must be 3 or more letters long and ascii only"
 
     def run(self):
         while self.running:
