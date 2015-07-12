@@ -37,7 +37,7 @@ class Watcher(Thread):
         board = keywords[1]
         keyword = keywords[2]
 
-        # Only accept keywords 3
+        # Only accept keywords 3 letters or more
         if len(keyword) < 3:
             return -1
 
@@ -77,7 +77,6 @@ class Watcher(Thread):
                     response = get(url, timeout=3)
                     json = loads(response.text)
 
-                    # This whole section is so ugly
                     for page in json:
                         for thread in page['threads']:
                             # Don't check threads we've already seen in order
