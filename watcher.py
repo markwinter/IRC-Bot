@@ -42,9 +42,8 @@ class Watcher(Thread):
             return -1
 
         # Check for ascii only letters
-        for c in keyword:
-            if c not in string.printable:
-                return -1
+        if not all(x in string.printable for x in keyword):
+            return -1
 
         # Check its a valid board
         if board not in self.watch:
