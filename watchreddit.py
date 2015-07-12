@@ -82,4 +82,4 @@ class WatchReddit(Thread):
 
                 mutex.release()
 
-            sleep(5)
+            sleep(60)
