@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import sys
+
 from linkresolver import LinkResolver
 from watchfourchan import WatchFourChan
 from watchhackernews import WatchHackerNews
 from watcheightchan import WatchEightChan
 from watchreddit import WatchReddit
+from watchpastebin import WatchPasteBin
+
 from re import findall
 from circuits import Debugger
 from circuits import Component
@@ -124,6 +127,7 @@ class Bot(Component):
             'hn': WatchHackerNews(self),
             'reddit': WatchReddit(self),
             '8ch': WatchEightChan(self),
+            'pastebin': WatchPasteBin(self),
         }
 
         # Add owner to whitelist

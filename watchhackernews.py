@@ -52,30 +52,31 @@ class WatchHackerNews(Thread):
 
     def run(self):
         while self.running:
-            response = get(self.base_url + "newstories.json", timeout=3)
-            json = loads(response.text)
+            if len(self.watch) > 0:
+                response = get(self.base_url + "newstories.json", timeout=3)
+                json = loads(response.text)
 
-            for story_id in json:
-                # Don't check posts we've already checked before
-                if story_id <= self.last_checked:
-                    break
+                for story_id in json:
+                    # Don't check posts we've already checked before
+                    if story_id <= self.last_checked:
+                        break
 
-                story_json = get(self.base_url + "item/" + str(story_id) + ".json", timeout=3)
-                story = loads(story_json.text)
+                    story_json = get(self.base_url + "item/" + str(story_id) + ".json", timeout=3)
+                    story = loads(story_json.text)
 
-                mutex.acquire()
+                    mutex.acquire()
 
-                for keyword in self.watch:
-                    if keyword.lower() in story.get('title', '').lower():
-                        for sender in self.sender[keyword]:
-                            self.ircbot.fire(PRIVMSG(sender,
-                            "Found new '" + str(keyword) + "' story on HN: " +
-                            "https://news.ycombinator.com/item?id=" + str(story_id)))
+                    for keyword in self.watch:
+                        if keyword.lower() in story.get('title', '').lower():
+                            for sender in self.sender[keyword]:
+                                self.ircbot.fire(PRIVMSG(sender,
+                                "Found new '" + str(keyword) + "' story on HN: " +
+                                "https://news.ycombinator.com/item?id=" + str(story_id)))
 
-                mutex.release()
+                    mutex.release()
 
-            # Update last new thread seen so we only check newer ones next time
-            # Assumption here is HN API orders their new stories 'json'
-            self.last_checked = json[0]
+                # Update last new thread seen so we only check newer ones next time
+                # Assumption here is HN API orders their new stories 'json'
+                self.last_checked = json[0]
 
             sleep(120)
