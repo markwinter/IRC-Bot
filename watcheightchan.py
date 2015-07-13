@@ -82,3 +82,5 @@ class WatchEightChan(Thread):
                                             )
 
                 mutex.release()
+
+            sleep(60)

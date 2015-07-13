@@ -3,7 +3,16 @@ import string
 from requests import get
 from lxml.html import fromstring
 from enum import Enum
-from timer import Timer
+
+class Timer():
+    def start_timer(self):
+        self.start = time.time()
+
+    def stop_timer(self):
+        self.end = time.time()
+
+    def elapsed_time(self):
+        return self.end - self.start
 
 class HTTPCode(Enum):
     """Make HTTP codes human readable.
