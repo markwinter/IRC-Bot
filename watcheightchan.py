@@ -80,3 +80,5 @@ class WatchEightChan(Thread):
                                                 "' thread found: https://8ch.net/" + str(board) +
                                                 "/res/" + str(thread['no']) + ".html")
                                             )
+
+                mutex.release()
