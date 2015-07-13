@@ -19,7 +19,7 @@ class WatchPasteBin(Thread):
         self.base_url = "https://pastebin.com/"
 
         self.watch = []
-        self.last_seen = ""
+        self.seen = []
         self.sender = defaultdict(list)
 
         self.running = True
@@ -59,9 +59,8 @@ class WatchPasteBin(Thread):
                 pastes = re.findall('<td><img src="/i/t.gif"  class="i_p0" alt="" border="0" /><a href="/(\w+)">.+</a></td>', html)
 
                 for paste in pastes:
-                    # Stop looking once we get to last checked paste
-                    if paste == self.last_seen:
-                        break
+                    if paste in self.seen:
+                        continue
 
                     paste_content = get(self.base_url + paste)
                     doc = fromstring(paste_content.text)
@@ -78,6 +77,6 @@ class WatchPasteBin(Thread):
                                 self.ircbot.fire(PRIVMSG(sender, "New '" + str(keyword) +
                                 "' paste found: https://pastebin.com/" + str(paste)))
 
-                self.last_seen = pastes[0]
+                    self.seen.append(paste)        
 
             sleep(30)
