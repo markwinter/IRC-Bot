@@ -38,12 +38,14 @@ class WatchHackerNews(Thread):
         if not all(x in string.printable for x in keywords[1]):
             return -1
 
-        mutex.acquire()
-        try:
+        # Check we're not already watching this keyword for this target
+        with mutex:
+            if self.sender[keywords[1]] and target in self.sender[keywords[1]]:
+                return -1
+
+        with mutex:
             self.watch.append(keywords[1])
             self.sender[keywords[1]].append(target)
-        finally:
-            mutex.release()
 
         self.ircbot.fire(PRIVMSG(target, "Now watching for '" + str(keywords[1] + "' on HN")))
 
@@ -52,7 +54,11 @@ class WatchHackerNews(Thread):
 
     def run(self):
         while self.running:
-            if len(self.watch) > 0:
+            with mutex:
+                keywords_exist = len(self.watch) > 0
+
+            # Only need to do something once we have our first keyword to monitor
+            if keywords_exist:
                 response = get(self.base_url + "newstories.json", timeout=3)
                 json = loads(response.text)
 
@@ -64,16 +70,16 @@ class WatchHackerNews(Thread):
                     story_json = get(self.base_url + "item/" + str(story_id) + ".json", timeout=3)
                     story = loads(story_json.text)
 
-                    mutex.acquire()
+                    with mutex:
+                        watch = self.watch
+                        sender = self.sender
 
-                    for keyword in self.watch:
+                    for keyword in watch:
                         if keyword.lower() in story.get('title', '').lower():
-                            for sender in self.sender[keyword]:
+                            for sender in sender[keyword]:
                                 self.ircbot.fire(PRIVMSG(sender,
                                 "Found new '" + str(keyword) + "' story on HN: " +
                                 "https://news.ycombinator.com/item?id=" + str(story_id)))
-
-                    mutex.release()
 
                 # Update last new thread seen so we only check newer ones next time
                 # Assumption here is HN API orders their new stories 'json'
