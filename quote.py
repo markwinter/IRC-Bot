@@ -1,6 +1,7 @@
 from threading import Thread
 from circuits.protocols.irc import PRIVMSG
 import random
+import time
 
 class Quote(Thread):
     def __init__(self):
@@ -13,6 +14,9 @@ class Quote(Thread):
         self.start()
 
     def execute(self, keywords, target, source, ircbot):
+        if len(keywords) < 2:
+            return -1
+
         if keywords[1] == "add":
             # Check they gave a quote
             if len(keywords) < 3:
@@ -20,8 +24,15 @@ class Quote(Thread):
 
             # Combine list into string
             quote = ' '.join(keywords[2:])
+
+            # Prefix date and time
+            quote_time = time.strftime("%H:%M:%S")
+            quote_date = time.strftime("%d/%m/%Y")
+
+            quote = "" + quote_date + " " + quote_time + " || " + quote
+
             self.quotes.append(quote)
-            ircbot.fire(PRIVMSG(target, "Added quote, id: " + str(len(self.quotes) - 1)))
+            ircbot.fire(PRIVMSG(target, "Added quote #" + str(len(self.quotes) - 1)))
 
         elif keywords[1] == "del":
             if len(keywords) != 3:
@@ -42,7 +53,7 @@ class Quote(Thread):
                 return
             elif len(self.quotes) == 1:
                 quote = self.quotes[0]
-                quote = "#0: " + quote
+                quote = "#0 " + quote
                 ircbot.fire(PRIVMSG(target, quote))
             else:
                 num = random.randrange(len(self.quotes) - 1)
@@ -55,7 +66,7 @@ class Quote(Thread):
 
             if self.quotes[int(keywords[2])]:
                 quote = self.quotes[int(keywords[2])]
-                quote = "#" + str(int(keywords[2])) + ": " + quote
+                quote = "#" + str(int(keywords[2])) + " " + quote
                 ircbot.fire(PRIVMSG(target, quote))
             else:
                 ircbot.fire(PRIVMSG(target, "Invalid quote id"))
