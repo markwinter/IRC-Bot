@@ -7,6 +7,7 @@ from watchhackernews import WatchHackerNews
 from watcheightchan import WatchEightChan
 from watchreddit import WatchReddit
 from watchpastebin import WatchPasteBin
+from quote import Quote
 
 from re import findall
 from circuits import Debugger
@@ -116,22 +117,24 @@ class Bot(Component):
         self.linkresolver = LinkResolver()
 
         self.commands = {
-            'commands': Commands(),
-            'help': Commands(),
-            'join': Join(),
-            'part': Part(),
-            'ban': Ban(),
-            'allow': Allow(),
-            'source': Source(),
-            '4chan': WatchFourChan(self),
-            'hn': WatchHackerNews(self),
-            'reddit': WatchReddit(self),
-            '8ch': WatchEightChan(self),
-            'pastebin': WatchPasteBin(self),
+            #'command_name': [CommandClass, CanAnyoneUseIt?]
+            'commands': [Commands(), True],
+            'help': [Commands(), True],
+            'join': [Join(), True],
+            'part': [Part(), True],
+            'ban': [Ban(), False],
+            'allow': [Allow(), False],
+            'source': [Source(), True],
+            '4chan': [WatchFourChan(self), False],
+            'hn': [WatchHackerNews(self), False],
+            'reddit': [WatchReddit(self), False],
+            '8ch': [WatchEightChan(self), False],
+            'pastebin': [WatchPasteBin(self), False],
+            'quote': [Quote(), True],
         }
 
         # Add owner to whitelist
-        self.commands['allow'].whitelist.append(self.owner_host)
+        self.commands['allow'][0].whitelist.append(self.owner_host)
 
         TCPClient(channel=self.channel).register(self)
         IRC(channel=self.channel).register(self)
@@ -185,7 +188,7 @@ class Bot(Component):
         from the server
         """
 
-        if message[:1] == self.command_char and source[2] in self.commands['allow'].whitelist:
+        if message[:1] == self.command_char:
             self.parse(message, source, target)
 
         else:
@@ -196,20 +199,23 @@ class Bot(Component):
 
     def parse(self, message, source, target):
         keywords = message.split(' ')
+        key = keywords[0][1:]
 
-        for key in self.commands:
-            if key == keywords[0][1:]:
-                response = 0
+        if self.commands[key]:
+            command = self.commands[key]
+        else:
+            return
 
-                try:
-                    response = self.commands[key].execute(keywords, target, source, self)
-                except:
-                    self.fire(PRIVMSG(target, "Command " + self.command_char + str(key) + " raised an exception"))
+        response = 0
 
-                if response == -1:
-                    self.fire(PRIVMSG(target, self.commands[key].usage()))
+        if command[1]:
+            response = command[0].execute(keywords, target, source, self)
 
-                break
+        elif source[2] in command[0].whitelist:
+            response = command[0].execute(keywords, target, source, self)
+
+        if response == -1:
+            self.fire(PRIVMSG(target, command[0].usage()))
 
     def list_commands(self):
         list = ""

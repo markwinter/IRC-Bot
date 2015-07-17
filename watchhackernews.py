@@ -41,7 +41,8 @@ class WatchHackerNews(Thread):
         # Check we're not already watching this keyword for this target
         with mutex:
             if self.sender[keywords[1]] and target in self.sender[keywords[1]]:
-                return -1
+                ircbot.fire(PRIVMSG(target, "Already watching for this keyword in this channel"))
+                return
 
         with mutex:
             self.watch.append(keywords[1])
@@ -54,35 +55,45 @@ class WatchHackerNews(Thread):
 
     def run(self):
         while self.running:
-            with mutex:
-                keywords_exist = len(self.watch) > 0
+            try:
 
-            # Only need to do something once we have our first keyword to monitor
-            if keywords_exist:
-                response = get(self.base_url + "newstories.json", timeout=3)
-                json = loads(response.text)
+                with mutex:
+                    keywords_exist = len(self.watch) > 0
 
-                for story_id in json:
-                    # Don't check posts we've already checked before
-                    if story_id <= self.last_checked:
-                        break
+                # Only need to do something once we have our first keyword to monitor
+                if keywords_exist:
+                    response = get(self.base_url + "newstories.json", timeout=3)
+                    json = loads(response.text)
 
-                    story_json = get(self.base_url + "item/" + str(story_id) + ".json", timeout=3)
-                    story = loads(story_json.text)
+                    max_id = 0
+                    for story_id in json:
+                        # Update max_id
+                        if story_id > max_id:
+                            max_id = story_id
 
-                    with mutex:
-                        watch = self.watch
-                        sender = self.sender
+                        # Don't check posts we've already checked before
+                        if story_id <= self.last_checked:
+                            break
 
-                    for keyword in watch:
-                        if keyword.lower() in story.get('title', '').lower():
-                            for sender in sender[keyword]:
-                                self.ircbot.fire(PRIVMSG(sender,
-                                "Found new '" + str(keyword) + "' story on HN: " +
-                                "https://news.ycombinator.com/item?id=" + str(story_id)))
+                        story_json = get(self.base_url + "item/" + str(story_id) + ".json", timeout=3)
+                        story = loads(story_json.text)
 
-                # Update last new thread seen so we only check newer ones next time
-                # Assumption here is HN API orders their new stories 'json'
-                self.last_checked = json[0]
+                        with mutex:
+                            watch = self.watch
+                            sender = self.sender
+
+                        for keyword in watch:
+                            if keyword.lower() in story.get('title', '').lower():
+                                for sender in sender[keyword]:
+                                    self.ircbot.fire(PRIVMSG(sender,
+                                    "Found new '" + str(keyword) + "' story on HN: " +
+                                    "https://news.ycombinator.com/item?id=" + str(story_id)))
+
+                    # Update last new thread seen so we only check newer ones next time
+                    # Assumption here is HN API orders their new stories 'json' in desc order
+                    self.last_checked = max_id
+
+            except:
+                pass
 
             sleep(120)

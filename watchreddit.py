@@ -57,6 +57,7 @@ class WatchReddit(Thread):
                 mutex.acquire()
 
                 if len(self.watch[sub]) > 0:
+                    # Reddit API policy says to use a unique user-agent
                     headers = { 'User-Agent': 'Fluffybot IRC Bot by /u/astonex'}
                     response = get(self.base_url + sub + "/new.json", timeout=3, headers=headers)
                     json = loads(response.text)
