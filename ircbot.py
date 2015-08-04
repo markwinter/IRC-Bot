@@ -201,6 +201,7 @@ class Bot(Component):
         keywords = message.split(' ')
         key = keywords[0][1:]
 
+        # Check it is a valid command
         if self.commands[key]:
             command = self.commands[key]
         else:
@@ -208,10 +209,12 @@ class Bot(Component):
 
         response = 0
 
+        # Can anyone use it?
         if command[1]:
             response = command[0].execute(keywords, target, source, self)
 
-        elif source[2] in command[0].whitelist:
+        # Else check source is in whitelist
+        elif source[2] in self.commands['allow'][0].whitelist:
             response = command[0].execute(keywords, target, source, self)
 
         if response == -1:
