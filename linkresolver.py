@@ -115,7 +115,7 @@ class LinkResolver():
         title = doc.cssselect("title")
 
         if title:
-            title = title[0].text.strip()
+            title = title[0].text.strip().replace("\n", "").replace("\r", "") # we gotta be sure
 
             # Detect Korean language
             is_korean = False
