@@ -207,18 +207,13 @@ class Bot(Component):
         else:
             return
 
-        response = 0
-
         # Can anyone use it?
         if command[1]:
-            response = command[0].execute(keywords, target, source, self)
+            command[0].execute(keywords, target, source, self)
 
         # Else check source is in whitelist
         elif source[2] in self.commands['allow'][0].whitelist:
-            response = command[0].execute(keywords, target, source, self)
-
-        if response == -1:
-            self.fire(PRIVMSG(target, command[0].usage()))
+            command[0].execute(keywords, target, source, self)
 
     def list_commands(self):
         list = ""
