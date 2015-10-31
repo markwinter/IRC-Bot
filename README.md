@@ -16,7 +16,7 @@ name each time.
 ### Adding commands to the bot
 
 - Create a new appropriately named file for your command
-- In the new file implement a class that has the method `execute(self, keywords, target, source, ircbot)` and `usage(self)`
+- In the new file implement a class that has the method `execute(self, keywords, target, source, ircbot)`
 - Improper usage of a command should return -1 in `execute` and define the usage string in `usage`
 - Import your class in ircbot.py
 - Add your command to the list of commands in the `init` of Bot() in ircbot.py
