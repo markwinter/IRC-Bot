@@ -28,15 +28,15 @@ class WatchHackerNews(Thread):
     def execute(self, keywords, target, source, ircbot):
         # Check for right amount of keywords for command
         if len(keywords) != 2:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Only accept keywords 3 letters or more
         if len(keywords[1]) < 3:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Check for ascii only letters
         if not all(x in string.printable for x in keywords[1]):
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Check we're not already watching this keyword for this target
         with mutex:
