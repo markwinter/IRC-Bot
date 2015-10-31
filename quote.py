@@ -21,12 +21,12 @@ class Quote(Thread):
 
     def execute(self, keywords, target, source, ircbot):
         if len(keywords) < 2:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         if keywords[1] == "add":
             # Check they gave at least a one word quote
             if len(keywords) < 3:
-                return -1
+                ircbot.fire(PRIVMSG(target, usage()))
 
             # Combine list into string
             quote = ' '.join(keywords[2:])
@@ -45,7 +45,7 @@ class Quote(Thread):
 
         elif keywords[1] == "del":
             if len(keywords) != 3:
-                return -1
+                ircbot.fire(PRIVMSG(target, usage()))
 
             quote = int(keywords[2])
 
@@ -71,7 +71,7 @@ class Quote(Thread):
 
         elif keywords[1] == "get":
             if len(keywords) != 3:
-                return -1
+                ircbot.fire(PRIVMSG(target, usage()))
 
             quote_id = int(keywords[2])
 
@@ -83,7 +83,7 @@ class Quote(Thread):
                 ircbot.fire(PRIVMSG(target, quote))
 
         else:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
     def usage(self):
         return "!quote [add <quote> | del <id> | random | get <id>]"
