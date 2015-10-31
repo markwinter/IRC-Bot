@@ -26,18 +26,18 @@ class WatchReddit(Thread):
 
     def execute(self, keywords, target, source, ircbot):
         if len(keywords) != 3:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         sub = keywords[1]
         keyword = keywords[2]
 
         # Only accept keywords 3 letters or more
         if len(keyword) < 3:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Check for ascii only letters
         if not all(x in string.printable for x in keyword):
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         mutex.acquire()
         try:
