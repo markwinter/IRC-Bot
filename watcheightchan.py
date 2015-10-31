@@ -27,18 +27,18 @@ class WatchEightChan(Thread):
     def execute(self, keywords, target, source, ircbot):
         # Check for right amount of keywords for command
         if len(keywords) != 3:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         board = keywords[1]
         keyword = keywords[2]
 
         # Only accept keywords 3 letters or more
         if len(keyword) < 3:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Check for ascii only letters
         if not all(x in string.printable for x in keyword):
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Try-finally to make sure we release the lock
         mutex.acquire()
