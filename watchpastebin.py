@@ -31,7 +31,7 @@ class WatchPasteBin(Thread):
 
     def execute(self, keywords, target, source, ircbot):
         if len(keywords) < 2:
-            return -1
+            ircbot.fire(PRIVMSG(target, usage()))
 
         # Combine all keywords into one
         keyword = ""
